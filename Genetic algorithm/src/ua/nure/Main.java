@@ -9,22 +9,24 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
+
 public class Main {
 	static Random rand = new Random();
  
 
 	static DecimalFormat df = new DecimalFormat("#.##");
 	static DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.getDefault());
-
-
+	final static float x1_min = 0.5f, x1_max = 1.1f, x2_min = 1.0f, x2_max = 4.6f;
+	final static int n = 500, amount = 2;
+	static int iterations=0;
 
 
 	public static void main(String[] args) {
 		//		 otherSymbols.setGroupingSeparator('.'); 
 		otherSymbols.setDecimalSeparator('.');
 		df = new DecimalFormat("#.##", otherSymbols);
-		final float x1_min = 0.5f, x1_max = 1.1f, x2_min = 1.0f, x2_max = 4.6f;
-		final int n = 500, amount = 2;
+		
 		float instance[][] = new float[n][amount];
 
 		//generate instance
@@ -46,6 +48,7 @@ public class Main {
 		
 		ArrayList<String> crossedChromosomes = new ArrayList<String>(); 
 		TreeMap<Float,Integer>  treeMap = new TreeMap<Float,Integer>(Collections.reverseOrder());
+		TreeMap<Float,Float[]>  best = new TreeMap<Float,Float[]>();
 		
 		int count=(int) (n*0.9);
 		int parent1 = 0,parent2=0;
@@ -53,7 +56,8 @@ public class Main {
 		boolean mask[][]=new boolean[n][amount];
 		String chromosome1 = null,chromosome2= null;
 		//цыкл
-		for(int ii=0; ii<50; ii++){
+		int ii;
+		for(ii=0; ii<100; ii++){
 			
 			
 		
@@ -91,11 +95,7 @@ public class Main {
 			crossedChromosomes.add(long_Chromosome.substring(i, i+30));
 			
 		}
-//
-//		for(String s: crossedChromosomes){
-//			System.out.println(Float.intBitsToFloat((Integer.parseInt(s,2))));
-//		}
-		// функция
+
 		
 		
 		for(int i=0; i<crossedChromosomes.size()-1;i+=2){
@@ -121,49 +121,27 @@ public class Main {
 	
 		treeMap.clear();
 		crossedChromosomes.clear();
-		System.out.println("Iteration #"+ii);
-		System.out.println("Best rezult="+best_rezult[0] + " x1=" + best_rezult[1] + " x2=" + best_rezult[2]);
-		 
-		
-		
-		
-		
-		
-		
+//		System.out.println("Iteration #"+ii);
+//		System.out.println("Best rezult="+best_rezult[0] + " x1=" + bes t_rezult[1] + " x2=" + best_rezult[2]);
+		 Float[] bestRezult=getBestRezult();
+         best.put(bestRezult[0], bestRezult);
 		}
-		System.out.println();
-		System.out.println("Best rezult="+best_rezult[0] + " x1=" + best_rezult[1] + " x2=" + best_rezult[2]);
-//		ArrayList<Integer[]> result = new ArrayList<Integer[]>();
+		
+		for(Map.Entry<Float, Float[]> entry : best.entrySet()){
+			
+//			System.out.println("Rezult= "+entry.getKey()+" x1= "+entry.getValue()[1]+" x2= "+ entry.getValue()[2]);
+			System.out.printf(" Rezult= %.2f%n "+" x1= "+entry.getValue()[1]+" x2= "+ entry.getValue()[2],entry.getKey());
+		}
+//		System.out.println();
+//		System.out.println("Best rezult="+best_rezult[0] + " x1=" + best_rezult[1] + " x2=" + best_rezult[2]);
+
 		
 		
 
 
 
 		
-		
-
-		//		&& long_Chromosome.charAt(i)==0
-
-		//		String chromosome1 = s_instance[parent1][0];
-
-
-		//		System.out.println( Float.intBitsToFloat(Integer.parseInt(chromosome1, 2)));
-
-
-		//порівняння 1 хромосоми з іншими 
-//		int i=0,sum=0;
-//		for(char h: chromosome1.toCharArray()){
-//			if(h==s_instance[0][0].charAt(i)) sum++;
-//			i++; 
-//		}
-		//		System.out.println(sum);
-		//		System.out.println(chromosome1);
-		//		System.out.println(s_instance[0][0]);
-		//		for(int i=0; i<chromosome1.length();i++){
-		//			
-		//			chromosome1.charAt(index)
-		//		}
-
+	
 		timer_end=System.nanoTime();
 
 		System.out.println("Time"+String.format("%,12d", timer_end-timet_start) + " ns") ;
@@ -255,6 +233,28 @@ public class Main {
 		
 		return Float.intBitsToFloat((Integer.parseInt(crosedChromosome,2)));
 	}
+	
+	public static Float[] getBestRezult (){
+		float x1 = 0,x2=0, rezult, bestRezult=0, param1, param2;
+		
+		for (int i = 0; i < n; i++) {	
+					x1 = Float.parseFloat(df.format( rand.nextFloat() * (x1_max - x1_min) + x1_min )) ;
+					x2 = Float.parseFloat(df.format( rand.nextFloat() * (x2_max - x2_min) + x2_min )) ;
+					rezult = (float) ((-2*Math.pow(x2, 3)+6*Math.pow(x2, 2)+10)*Math.sin(Math.log(x1)*Math.exp(x2))); 
+					if(rezult>bestRezult) {bestRezult=rezult; param1=x1; param2=x2;}
+		}
+		
+//		System.out.println("#"+iterations+" rezult="+bestRezult+" x1= "+ x1+" x2="+x2);
+		Float[] f ={bestRezult,x1,x2};
+		iterations++;
+		return f;
+	}
+	
+	public static void bestHromosome(float[] bestRezult){
+		float bestHtomosome[][] = new float[3][50];
+	
+	}
+	
 }
 // який масив більший? одновимірний чи двовимірний? який швидше працює?
 //String formatedDouble = String.format("%.2f", d);
